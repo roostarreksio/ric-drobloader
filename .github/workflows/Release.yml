@@ -11,8 +11,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Add permission
-        run: chmod 777 ./.github/workflows/AMkd/AMkd.out
       - name: Zip Decoded
         run: zip -r release_dev.zip . -x ".git/*" ".github/*" "README.md" "LICENSE"
       - name: Encrypt

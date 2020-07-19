@@ -17,7 +17,7 @@ A mod for Rex and Wizards game that allows to load pre-made savestates
 
 [mysliwy112](https://github.com/mysliwy112) for creating ANN-transcoder [Anndrzem](https://github.com/mysliwy112/AM-transcoder) which is used to add new mod graphics
 
-__KatekaYuka__ for creating awesome drawn graphics for the mod
+[KatekaYuka](https://twitter.com/KatekaYuka) for creating awesome drawn graphics for the mod
 
 
 ![](https://i.imgur.com/e79Yce8.png)

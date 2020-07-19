@@ -1,0 +1,112 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+jobs:
+  Release:
+    if: contains(github.event.commits[0].message, '#minor') || contains(github.event.commits[0].message, '#major') || contains(github.event.commits[0].message, '#patch')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Add permission
+        run: chmod 777 ./.github/workflows/AMkd/AMkd.out
+      - name: Zip Decoded
+        run: zip -r release_dev.zip . -x ".git/*" ".github/*" "README.md" "LICENSE"
+      - name: Encrypt
+        run: |
+          find -type f -name '*.cnv' | xargs ./.github/workflows/AMkd/AMkd.out -k
+          find -type f -name '*.class' | xargs ./.github/workflows/AMkd/AMkd.out -k
+      - name: Rename
+        run: |
+          find -type f -name '*.cnv.kod' -print0 | sed 's/.cnv.kod//g' | xargs -0 -I name mv name.cnv.kod  name.cnv
+          find -type f -name '*.class.kod' -print0 | sed 's/.class.kod//g' | xargs -0 -I name mv name.class.kod  name.class
+      - name: Zip Coded
+        run: zip -r release.zip . -x "release_dev.zip" ".git/*" ".github/*" "README.md" "LICENSE"
+      - name: Determine next version/tag
+        id: determine
+        uses: anothrNick/github-tag-action@1.17.2
+        env:
+          DRY_RUN: true
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.determine.outputs.new_tag }}
+          release_name: ric-drobloader ${{ steps.determine.outputs.new_tag }}
+          draft: false
+          prerelease: false
+      - name: Upload Coded
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release.zip
+          asset_name: ric-drobloader-${{ steps.determine.outputs.new_tag }}-default.zip
+          asset_content_type: application/zip
+      - name: Upload Decoded
+        id: upload-release-asset-dev
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release_dev.zip
+          asset_name: ric-workshop-${{ steps.determine.outputs.new_tag }}-dev.zip
+          asset_content_type: application/zip
+      - name: Checkout and merge minimal
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout minimal
+          git merge origin/master
+          git push
+      - name: Encrypt minimal
+        run: |
+          find -type f -name '*.cnv' | xargs ./.github/workflows/AMkd/AMkd.out -k
+          find -type f -name '*.class' | xargs ./.github/workflows/AMkd/AMkd.out -k
+      - name: Rename minimal
+        run: |
+          find -type f -name '*.cnv.kod' -print0 | sed 's/.cnv.kod//g' | xargs -0 -I name mv name.cnv.kod  name.cnv
+          find -type f -name '*.class.kod' -print0 | sed 's/.class.kod//g' | xargs -0 -I name mv name.class.kod  name.class
+      - name: Zip minimal
+        run: zip -r release_minimal.zip . -x "release_dev.zip" "release.zip" ".git/*" ".github/*" "README.md" "LICENSE"
+      - name: Upload minimal
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release_minimal.zip
+          asset_name: ric-drobloader-${{ steps.determine.outputs.new_tag }}-minimal.zip
+          asset_content_type: application/zip
+      - name: Checkout and merge rus
+        run: |
+          git checkout rus
+          git merge origin/master
+          git push
+      - name: Encrypt rus
+        run: |
+          find -type f -name '*.cnv' | xargs ./.github/workflows/AMkd/AMkd.out -k
+          find -type f -name '*.class' | xargs ./.github/workflows/AMkd/AMkd.out -k
+      - name: Rename rus
+        run: |
+          find -type f -name '*.cnv.kod' -print0 | sed 's/.cnv.kod//g' | xargs -0 -I name mv name.cnv.kod  name.cnv
+          find -type f -name '*.class.kod' -print0 | sed 's/.class.kod//g' | xargs -0 -I name mv name.class.kod  name.class
+      - name: Zip rus
+        run: zip -r release_rus.zip . -x "release_dev.zip" "release.zip" "release_minimal.zip" ".git/*" ".github/*" "README.md" "LICENSE"
+      - name: Upload rus
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release_rus.zip
+          asset_name: ric-drobloader-${{ steps.determine.outputs.new_tag }}-rus.zip
+          asset_content_type: application/zip

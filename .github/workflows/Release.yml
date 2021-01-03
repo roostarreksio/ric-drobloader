@@ -56,7 +56,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./release_dev.zip
-          asset_name: ric-workshop-${{ steps.determine.outputs.new_tag }}-dev.zip
+          asset_name: ric-drobloader-${{ steps.determine.outputs.new_tag }}-dev.zip
           asset_content_type: application/zip
       - name: Checkout and merge minimal
         run: |
